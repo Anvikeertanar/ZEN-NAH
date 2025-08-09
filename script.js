@@ -31,15 +31,19 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalCycles = 3;
     let currentCycle = 0;
 
-    // Generate a random wave path
-    function generateRandomWavePath(width = svgSize, height = svgSize, points = 8) {
+    // Generate a random sine-like wave path
+    function generateRandomWavePath(width = svgSize, height = svgSize, points = 100) {
+        // Randomize amplitude and frequency for each cycle
+        const amplitude = (Math.random() * 0.3 + 0.2) * (height / 2); // 20% to 50% of half height
+        const frequency = Math.random() * 2 + 1; // 1 to 3 full sine waves
+        const phase = Math.random() * Math.PI * 2; // random phase shift
+
         let d = `M 0 ${height / 2}`;
-        const step = width / (points - 1);
-        for (let i = 1; i < points; i++) {
-            const amplitude = (Math.random() * 0.4 + 0.3) * (height / 2);
-            const direction = i % 2 === 0 ? 1 : -1;
-            const y = height / 2 + direction * amplitude;
-            d += ` Q ${step * (i - 0.5)} ${y}, ${step * i} ${height / 2}`;
+        for (let i = 1; i <= points; i++) {
+            const x = (i / points) * width;
+            // Sine wave with random amplitude, frequency, and phase
+            const y = height / 2 + Math.sin(frequency * (i / points) * Math.PI * 2 + phase) * amplitude;
+            d += ` L ${x} ${y}`;
         }
         return d;
     }
