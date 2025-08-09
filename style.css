@@ -45,6 +45,19 @@ body {
     margin: 0;
 }
 
+.quote {
+    margin-top: 25px;
+    font-size: 1.1em;
+    color: #e5e100;
+    font-style: italic;
+    opacity: 0.85;
+    transition: opacity 0.5s;
+    min-height: 1.5em;
+    max-width: 260px;
+    text-align: center;
+    z-index: 20;
+}
+
 .animation-container {
     position: relative;
     width: 300px;
