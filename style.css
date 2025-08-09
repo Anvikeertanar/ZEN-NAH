@@ -44,7 +44,6 @@ body {
     color: #e5b300;
     margin: 0;
 }
-/* ...existing code... */
 
 .quote {
     margin-top: 25px;
@@ -58,8 +57,6 @@ body {
     text-align: center;
     z-index: 20;
 }
-
-/* ...existing code... */
 
 .animation-container {
     position: relative;
@@ -78,8 +75,9 @@ svg {
 
 #breathing-path {
     fill: none;
-    /* This line completely removes the visible path */
-    stroke: none;
+    stroke: #e5e100;
+    stroke-width: 2.5;
+    opacity: 0.25;
 }
 
 #ball {
@@ -88,13 +86,15 @@ svg {
     background: radial-gradient(circle, #ffeb99 0%, #e5b300 70%);
     border-radius: 50%;
     position: absolute;
+    left: 0;
+    top: 0;
     transform: translate(-50%, -50%);
     box-shadow: 0 0 15px #e5b300, 0 0 30px #e5b300;
     z-index: 10;
 }
 
 /* The trail effect */
-#ball::before {s
+#ball::before {
     content: '';
     position: absolute;
     top: 50%;

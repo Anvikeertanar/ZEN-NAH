@@ -2,125 +2,122 @@ document.addEventListener('DOMContentLoaded', () => {
     const ball = document.getElementById('ball');
     const svgContainer = document.querySelector('.animation-container');
     const instructionText = document.getElementById('breathing-instruction');
+    const quoteEl = document.getElementById('breathing-quote');
 
-    // Create a dynamic SVG path element
+    // SVG setup
+    const svgSize = 300;
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("width", svgSize);
+    svg.setAttribute("height", svgSize);
+    svg.setAttribute("viewBox", `0 0 ${svgSize} ${svgSize}`);
+    svg.setAttribute("preserveAspectRatio", "none");
     const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
     path.setAttribute("id", "breathing-path");
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-    svg.setAttribute("viewBox", "0 0 100 100");
-    svg.setAttribute("preserveAspectRatio", "none");
     svg.appendChild(path);
     svgContainer.appendChild(svg);
-    
-    // Animation parameters
-    const totalCycles = 3;
+
+    // Quotes
+    const quotes = [
+        "Breathe out stress, breathe in peace.",
+        "Let go and relax.",
+        "Release what you cannot control.",
+        "Exhale tension, inhale calm.",
+        "Every breath is a new beginning.",
+        "Let your thoughts drift away.",
+        "Calm is a superpower.",
+        "You are here, you are now.",
+        "Peace begins with a single breath."
+    ];
+
+    // Breathing parameters
     const inhaleDuration = 3000;
     const exhaleDuration = 3000;
-    const cycleDuration = inhaleDuration + exhaleDuration;
-    const pathWidth = 100;
-    const pathHeight = 100;
-    const chaosLevel = 10;
-
+    const totalCycles = 3;
     let currentCycle = 0;
-    let isChaotic = false;
-    let lastPoint = null;
 
-    function generatePath() {
-        let d = "M0 " + pathHeight / 2;
-        
-        if (!isChaotic) {
-            // Sine wave path
-            for (let i = 0; i <= totalCycles; i++) {
-                const startX = i * (pathWidth / totalCycles);
-                d += S${startX + (pathWidth / totalCycles) * 0.25} ${pathHeight * 0.1}, ${startX + (pathWidth / totalCycles) * 0.5} ${pathHeight / 2};
-                d += S${startX + (pathWidth / totalCycles) * 0.75} ${pathHeight * 0.9}, ${startX + (pathWidth / totalCycles)} ${pathHeight / 2};
-            }
-        } else {
-            // Chaotic path
-            let x = 0;
-            let y = pathHeight / 2;
-            d = M${x} ${y};
-            
-            for (let i = 0; i < 50; i++) {
-                x += pathWidth / 50;
-                y += (Math.random() - 0.5) * chaosLevel;
-                y = Math.min(Math.max(y, 10), pathHeight - 10);
-                d += L${x.toFixed(2)} ${y.toFixed(2)};
-            }
+    // Generate a random sine-like wave path
+    function generateRandomWavePath(width = svgSize, height = svgSize, points = 100) {
+        const amplitude = (Math.random() * 0.3 + 0.2) * (height / 2); // 20% to 50% of half height
+        const frequency = Math.random() * 2 + 1; // 1 to 3 full sine waves
+        const phase = Math.random() * Math.PI * 2; // random phase shift
+
+        let d = `M 0 ${height / 2}`;
+        for (let i = 1; i <= points; i++) {
+            const x = (i / points) * width;
+            const y = height / 2 + Math.sin(frequency * (i / points) * Math.PI * 2 + phase) * amplitude;
+            d += ` L ${x} ${y}`;
         }
-        
-        path.setAttribute("d", d);
-        return path.getTotalLength();
+        return d;
     }
 
-    function animatePath() {
-        let pathLength = generatePath();
-        let startTime = null;
+    // Show/hide quote
+    function showRandomQuote() {
+        const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+        quoteEl.textContent = randomQuote;
+        quoteEl.style.opacity = 1;
+    }
+    function hideQuote() {
+        quoteEl.style.opacity = 0;
+    }
 
-        function step(timestamp) {
-            if (!startTime) {
-                startTime = timestamp;
-            }
+    // Animate ball along path
+    function animateBreathingCycle() {
+        // Generate new path for each cycle
+        const d = generateRandomWavePath();
+        path.setAttribute('d', d);
+        const pathLength = path.getTotalLength();
 
-            const elapsedTime = timestamp - startTime;
-            let instruction;
-            let currentPathLength;
-
-            if (isChaotic) {
-                const duration = 10000;
-                const progress = Math.min(elapsedTime / duration, 1);
-                currentPathLength = progress * pathLength;
-                instruction = "FOLLOW THE CHAOS";
-                instructionText.textContent = instruction;
-                
-                if (progress >= 1) {
-                    return; // End animation
-                }
-            } else {
-                const progress = (elapsedTime % cycleDuration) / cycleDuration;
-                
-                if (progress < (inhaleDuration / cycleDuration)) {
-                    instruction = "BREATHE IN";
+        // Inhale
+        instructionText.textContent = "BREATHE IN";
+        hideQuote();
+        animateBall(0, pathLength, inhaleDuration, () => {
+            // Exhale
+            instructionText.textContent = "BREATHE OUT";
+            showRandomQuote();
+            animateBall(pathLength, 0, exhaleDuration, () => {
+                currentCycle++;
+                if (currentCycle < totalCycles) {
+                    animateBreathingCycle();
                 } else {
-                    instruction = "BREATHE OUT";
+                    instructionText.textContent = "SESSION COMPLETE";
+                    hideQuote();
                 }
+            });
+        });
+    }
 
-                currentPathLength = (currentCycle * (pathLength / totalCycles)) + (progress * (pathLength / totalCycles));
-                instructionText.textContent = instruction;
-                
-                if (elapsedTime >= (currentCycle + 1) * cycleDuration) {
-                    currentCycle++;
-                    if (currentCycle >= totalCycles) {
-                        isChaotic = true;
-                        animatePath();
-                        return;
-                    }
-                }
-            }
-            
-            const point = path.getPointAtLength(currentPathLength);
-            
-            // Get the previous point to calculate the angle for the trail
-            let angle = 0;
+    // Animate ball from startLen to endLen over duration ms
+    function animateBall(startLen, endLen, duration, callback) {
+        const startTime = performance.now();
+        let lastPoint = null;
+        function step(now) {
+            const elapsed = now - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const currentLen = startLen + (endLen - startLen) * progress;
+            const point = path.getPointAtLength(currentLen);
+
+            // Position the ball (SVG and container are same size)
+            ball.style.left = `${point.x}px`;
+            ball.style.top = `${point.y}px`;
+
+            // Optional: rotate the ball to follow the path direction
             if (lastPoint) {
-                angle = Math.atan2(point.y - lastPoint.y, point.x - lastPoint.x) * 180 / Math.PI;
+                const angle = Math.atan2(point.y - lastPoint.y, point.x - lastPoint.x) * 180 / Math.PI;
+                ball.style.transform = `translate(-50%, -50%) rotate(${angle}deg)`;
             }
-            
-            ball.style.left = point.x + 'px';
-            ball.style.top = point.y + 'px';
-            ball.style.transform = translate(-50%, -50%) rotate(${angle}deg);
-            
+
             lastPoint = point;
-            
-            window.requestAnimationFrame(step);
+
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            } else {
+                callback();
+            }
         }
 
-        const startPoint = path.getPointAtLength(0);
-        ball.style.left = startPoint.x + 'px';
-        ball.style.top = startPoint.y + 'px';
-        
         window.requestAnimationFrame(step);
     }
-    
-    animatePath();
+
+    // Start the animation
+    animateBreathingCycle();
 });
