@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Breathing Animation</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="breathing-app">
+  <div class="text-container">
+    <h1 id="breathing-instruction">BREATHE OUT</h1>
+    <p class="subtitle">WHEN THE BALL GOES DOWN</p>
+    <p class="handle">@mindset.therapy</p>
+  </div>
+
+  <div class="animation-container">
+    <svg viewBox="0 0 100 100" preserveAspectRatio="none">
+        <path id="breathing-path" d="M0 80 Q25 10, 50 10 Q75 10, 100 80" />
+    </svg>
+    <div id="ball"></div>
+  </div>
+
+  <div class="logo">
+    <img src="https://via.placeholder.com/60x60/121212/E5B300?text=M" alt="Logo" class="logo-image">
+  </div>
+</div>
+
+<script src="script.js"></script>
+
+</body>
+</html>
